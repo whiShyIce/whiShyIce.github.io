@@ -73,6 +73,34 @@
           播放失败
         </div></div> <div class="reco-bgm-info" data-v-128600c6 data-v-41bcba48 data-v-128600c6><div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-music music" data-v-128600c6></i>我想part2</div> <div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-artist" data-v-128600c6></i>法老,杨秋儒</div> <div class="reco-bgm-progress" data-v-128600c6><div class="progress-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div> <div class="reco-bgm-operation" data-v-128600c6><i class="reco-bgm reco-bgm-last last" data-v-128600c6></i> <i class="reco-bgm reco-bgm-pause pause" style="display:none;" data-v-128600c6></i> <i class="reco-bgm reco-bgm-play play" data-v-128600c6></i> <i class="reco-bgm reco-bgm-next next" data-v-128600c6></i> <i class="reco-bgm reco-bgm-volume1 volume" data-v-128600c6></i> <i class="reco-bgm reco-bgm-mute mute" style="display:none;" data-v-128600c6></i> <div class="volume-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div></div> <div class="reco-bgm-left-box" data-v-128600c6 data-v-41bcba48 data-v-128600c6><i class="reco-bgm reco-bgm-left" data-v-128600c6></i></div></div></div></div></div>
     <script src="/assets/js/app.4f4549fd.js" defer></script><script src="/assets/js/3.47187d05.js" defer></script><script src="/assets/js/1.5f88da07.js" defer></script><script src="/assets/js/12.f813a8f7.js" defer></script>
+    <script>
+    // Vue hydration 之后替换音乐为「等」
+    (function(){
+      var done=false;
+      function swap(){
+        if(done)return;
+        var a=document.getElementById('bgm');
+        if(!a||!a.src||a.src.indexOf('1488254762')!==-1){setTimeout(swap,200);return;}
+        // 暂停旧曲，换源
+        a.pause();
+        a.src='https://music.163.com/song/media/outer/url?id=1488254762.mp3';
+        a.load();
+        // 改歌名和歌手
+        var els=document.querySelectorAll('.reco-bgm-info .info-box');
+        if(els.length>=2){els[0].childNodes[1]&&(els[0].childNodes[1].textContent='等');els[1].childNodes[1]&&(els[1].childNodes[1].textContent='吴青峰');}
+        done=true;
+      }
+      document.addEventListener('DOMContentLoaded',function(){setTimeout(swap,800);});
+      // 也监听 audio src 属性变化（防 Vue 多次覆盖）
+      setTimeout(function(){
+        var a=document.getElementById('bgm');
+        if(a){
+          new MutationObserver(function(){swap();}).observe(a,{attributes:true,attributeFilter:['src']});
+        }
+      },500);
+      setTimeout(swap,2000);
+    })();
+    </script>
 
 
 
