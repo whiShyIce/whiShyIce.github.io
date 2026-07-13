@@ -73,5 +73,22 @@
           播放失败
         </div></div> <div class="reco-bgm-info" data-v-128600c6 data-v-41bcba48 data-v-128600c6><div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-music music" data-v-128600c6></i>我想part2</div> <div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-artist" data-v-128600c6></i>法老,杨秋儒</div> <div class="reco-bgm-progress" data-v-128600c6><div class="progress-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div> <div class="reco-bgm-operation" data-v-128600c6><i class="reco-bgm reco-bgm-last last" data-v-128600c6></i> <i class="reco-bgm reco-bgm-pause pause" style="display:none;" data-v-128600c6></i> <i class="reco-bgm reco-bgm-play play" data-v-128600c6></i> <i class="reco-bgm reco-bgm-next next" data-v-128600c6></i> <i class="reco-bgm reco-bgm-volume1 volume" data-v-128600c6></i> <i class="reco-bgm reco-bgm-mute mute" style="display:none;" data-v-128600c6></i> <div class="volume-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div></div> <div class="reco-bgm-left-box" data-v-128600c6 data-v-41bcba48 data-v-128600c6><i class="reco-bgm reco-bgm-left" data-v-128600c6></i></div></div></div></div></div>
     <script src="/assets/js/app.4f4549fd.js" defer></script><script src="/assets/js/3.47187d05.js" defer></script><script src="/assets/js/1.5f88da07.js" defer></script><script src="/assets/js/11.5b67021b.js" defer></script>
+    <script>
+    // Vue hydration 之后注入图片
+    document.addEventListener('DOMContentLoaded',function(){
+      setTimeout(function(){
+        var content=document.querySelector('.theme-reco-content');
+        if(content){
+          var img=document.createElement('img');
+          img.src='/assets/img/2b93187a4f778700e502e3252cb80d5b.jpg';
+          img.alt='';
+          img.style.maxWidth='100%';
+          img.style.borderRadius='8px';
+          img.style.marginTop='1rem';
+          content.appendChild(img);
+        }
+      },800);
+    });
+    </script>
   </body>
 </html>
