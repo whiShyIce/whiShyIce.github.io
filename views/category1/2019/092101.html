@@ -74,6 +74,106 @@
         </div></div> <div class="reco-bgm-info" data-v-128600c6 data-v-41bcba48 data-v-128600c6><div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-music music" data-v-128600c6></i>我想part2</div> <div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-artist" data-v-128600c6></i>法老,杨秋儒</div> <div class="reco-bgm-progress" data-v-128600c6><div class="progress-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div> <div class="reco-bgm-operation" data-v-128600c6><i class="reco-bgm reco-bgm-last last" data-v-128600c6></i> <i class="reco-bgm reco-bgm-pause pause" style="display:none;" data-v-128600c6></i> <i class="reco-bgm reco-bgm-play play" data-v-128600c6></i> <i class="reco-bgm reco-bgm-next next" data-v-128600c6></i> <i class="reco-bgm reco-bgm-volume1 volume" data-v-128600c6></i> <i class="reco-bgm reco-bgm-mute mute" style="display:none;" data-v-128600c6></i> <div class="volume-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div></div> <div class="reco-bgm-left-box" data-v-128600c6 data-v-41bcba48 data-v-128600c6><i class="reco-bgm reco-bgm-left" data-v-128600c6></i></div></div></div></div></div>
     <script src="/assets/js/app.4f4549fd.js" defer></script><script src="/assets/js/3.47187d05.js" defer></script><script src="/assets/js/1.5f88da07.js" defer></script><script src="/assets/js/12.f813a8f7.js" defer></script>
 
+    <!-- 自定义音乐播放器 -->
+    <style>
+      .custom-player{position:fixed;left:10px;bottom:10px;z-index:999999;background:rgba(255,255,255,.95);border-radius:12px;padding:12px 16px;box-shadow:0 2px 12px rgba(0,0,0,.12);font-size:13px;display:flex;align-items:center;gap:10px;max-width:320px;min-width:200px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+      .custom-player .cover{width:40px;height:40px;border-radius:8px;background:#eee;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px}
+      .custom-player .info{flex:1;min-width:0;overflow:hidden}
+      .custom-player .info .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#333}
+      .custom-player .info .artist{font-size:11px;color:#999;margin-top:2px}
+      .custom-player .progress{width:100%;height:3px;background:#eee;border-radius:2px;margin-top:6px;cursor:pointer}
+      .custom-player .progress .bar{height:100%;background:#ff6b6b;border-radius:2px;width:0;transition:width .1s linear}
+      .custom-player .time{font-size:10px;color:#aaa;margin-top:2px;display:flex;justify-content:space-between}
+      .custom-player .btns{display:flex;align-items:center;gap:4px}
+      .custom-player .btns button{width:28px;height:28px;border:none;background:#f5f5f5;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:#555}
+      .custom-player .btns button:hover{background:#ff6b6b;color:#fff}
+      .custom-player .btns button.playing{background:#ff6b6b;color:#fff}
+      .hide-old-player .reco-bgm-box{display:none!important}
+    </style>
+
+    <div class="custom-player" id="customPlayer">
+      <div class="cover" id="playerCover">&#9835;</div>
+      <div class="info">
+        <div class="title" id="playerTitle">-</div>
+        <div class="artist" id="playerArtist">-</div>
+        <div class="progress" id="playerProgress"><div class="bar" id="playerBar"></div></div>
+        <div class="time"><span id="playerCurr">00:00</span><span id="playerTotal">00:00</span></div>
+      </div>
+      <div class="btns">
+        <button onclick="player.prev()" title="上一首">&#x23EE;</button>
+        <button id="playerPlayBtn" onclick="player.toggle()">&#x25B6;</button>
+        <button onclick="player.next()" title="下一首">&#x23ED;</button>
+      </div>
+    </div>
+    <audio id="playerAudio" preload="auto"></audio>
+
+    <script>
+    (function(){
+      var playlist=[
+        {id:'1488254762',title:'等',artist:'吴青峰'},
+        {id:'1488254765',title:'一点点',artist:'吴青峰'}
+      ];
+      var idx=0;
+      var audio=document.getElementById('playerAudio');
+      var bar=document.getElementById('playerBar');
+      var curr=document.getElementById('playerCurr');
+      var total=document.getElementById('playerTotal');
+      var title=document.getElementById('playerTitle');
+      var artist=document.getElementById('playerArtist');
+      var btn=document.getElementById('playerPlayBtn');
+      var cover=document.getElementById('playerCover');
+
+      function load(i){
+        idx=i;
+        var s=playlist[i];
+        audio.src='http://music.163.com/song/media/outer/url?id='+s.id+'.mp3';
+        title.textContent=s.title;
+        artist.textContent=s.artist;
+        cover.innerHTML='&#9835;';
+        bar.style.width='0';
+        curr.textContent='00:00';
+        total.textContent='00:00';
+        btn.innerHTML='&#x25B6;';
+        btn.classList.remove('playing');
+      }
+
+      function fmt(t){
+        var m=Math.floor(t/60);
+        var s=Math.floor(t%60);
+        return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+      }
+
+      audio.addEventListener('loadedmetadata',function(){total.textContent=fmt(audio.duration);});
+      audio.addEventListener('timeupdate',function(){
+        if(audio.duration){
+          bar.style.width=(audio.currentTime/audio.duration*100)+'%';
+          curr.textContent=fmt(audio.currentTime);
+        }
+      });
+      audio.addEventListener('ended',function(){player.next();});
+      audio.addEventListener('error',function(){cover.innerHTML='&#9888;';});
+
+      document.getElementById('playerProgress').addEventListener('click',function(e){
+        if(!audio.duration)return;
+        var r=this.getBoundingClientRect();
+        audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
+      });
+
+      window.player={
+        toggle:function(){
+          if(audio.paused){audio.play();btn.innerHTML='&#x23F8;';btn.classList.add('playing');}
+          else{audio.pause();btn.innerHTML='&#x25B6;';btn.classList.remove('playing');}
+        },
+        prev:function(){load(idx>0?idx-1:playlist.length-1);audio.play();btn.innerHTML='&#x23F8;';btn.classList.add('playing');},
+        next:function(){load(idx<playlist.length-1?idx+1:0);audio.play();btn.innerHTML='&#x23F8;';btn.classList.add('playing');}
+      };
+
+      load(0);
+      // 隐藏旧播放器
+      setTimeout(function(){document.body.classList.add('hide-old-player');},1000);
+    })();
+    </script>
+
     <!-- Giscus 评论区 -->
     <div style="max-width:740px;margin:2rem auto;padding:0 2rem;">
       <div class="giscus"></div>
