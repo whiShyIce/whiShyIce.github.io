@@ -105,10 +105,16 @@
         <button onclick="player.next()" title="下一首">&#x23ED;</button>
       </div>
     </div>
-    <audio id="playerAudio" preload="auto"></audio>
+    <audio id="playerAudio" preload="auto" crossorigin="anonymous" referrerpolicy="no-referrer"></audio>
 
     <script>
     (function(){
+      // 添加 meta referrer 绕过网易云防盗链
+      var meta=document.createElement('meta');
+      meta.name='referrer';
+      meta.content='no-referrer';
+      document.head.appendChild(meta);
+
       var playlist=[
         {id:'1488254762',title:'等',artist:'吴青峰'},
         {id:'1488254765',title:'一点点',artist:'吴青峰'}
@@ -126,7 +132,7 @@
       function load(i){
         idx=i;
         var s=playlist[i];
-        audio.src='http://music.163.com/song/media/outer/url?id='+s.id+'.mp3';
+        audio.src='https://music.163.com/song/media/outer/url?id='+s.id+'.mp3';
         title.textContent=s.title;
         artist.textContent=s.artist;
         cover.innerHTML='&#9835;';
