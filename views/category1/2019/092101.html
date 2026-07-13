@@ -73,32 +73,60 @@
           播放失败
         </div></div> <div class="reco-bgm-info" data-v-128600c6 data-v-41bcba48 data-v-128600c6><div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-music music" data-v-128600c6></i>我想part2</div> <div class="info-box" data-v-128600c6><i class="reco-bgm reco-bgm-artist" data-v-128600c6></i>法老,杨秋儒</div> <div class="reco-bgm-progress" data-v-128600c6><div class="progress-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div> <div class="reco-bgm-operation" data-v-128600c6><i class="reco-bgm reco-bgm-last last" data-v-128600c6></i> <i class="reco-bgm reco-bgm-pause pause" style="display:none;" data-v-128600c6></i> <i class="reco-bgm reco-bgm-play play" data-v-128600c6></i> <i class="reco-bgm reco-bgm-next next" data-v-128600c6></i> <i class="reco-bgm reco-bgm-volume1 volume" data-v-128600c6></i> <i class="reco-bgm reco-bgm-mute mute" style="display:none;" data-v-128600c6></i> <div class="volume-bar" data-v-128600c6><div class="bar" data-v-128600c6></div></div></div></div> <div class="reco-bgm-left-box" data-v-128600c6 data-v-41bcba48 data-v-128600c6><i class="reco-bgm reco-bgm-left" data-v-128600c6></i></div></div></div></div></div>
     <script src="/assets/js/app.4f4549fd.js" defer></script><script src="/assets/js/3.47187d05.js" defer></script><script src="/assets/js/1.5f88da07.js" defer></script><script src="/assets/js/12.f813a8f7.js" defer></script>
+    <!-- 本地音乐播放器 -->
+    <style>
+    .my-bgm{position:fixed;left:10px;bottom:10px;z-index:999999;background:rgba(255,255,255,.95);border-radius:10px;padding:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,.12);font-size:13px;max-width:260px;min-width:180px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;display:flex;align-items:center;gap:8px;border:1px solid #eee;user-select:none}
+    .my-bgm .cover{width:36px;height:36px;border-radius:50%;background:#ff6b6b;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+    .my-bgm .info{flex:1;min-width:0}
+    .my-bgm .info .name{font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+    .my-bgm .info .artist{font-size:10px;color:#999;margin-top:1px}
+    .my-bgm .info .pg{width:100%;height:3px;background:#eee;border-radius:2px;margin-top:5px;cursor:pointer}
+    .my-bgm .info .pg .bar{height:100%;background:#ff6b6b;border-radius:2px;width:0}
+    .my-bgm .info .time{font-size:9px;color:#bbb;margin-top:1px;display:flex;justify-content:space-between}
+    .my-bgm .btn{width:30px;height:30px;border:none;background:#f5f5f5;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:#555;flex-shrink:0}
+    .my-bgm .btn:hover{background:#ff6b6b;color:#fff}
+    .my-bgm .btn.playing{background:#ff6b6b;color:#fff}
+    </style>
+    <div class="my-bgm" id="myBgm">
+      <div class="cover">&#9835;</div>
+      <div class="info">
+        <div class="name">等</div>
+        <div class="artist">吴青峰</div>
+        <div class="pg" id="myPg"><div class="bar" id="myBar"></div></div>
+        <div class="time"><span id="myCurr">00:00</span><span id="myTotal">00:00</span></div>
+      </div>
+      <button class="btn" id="myBtn" title="播放">&#9654;</button>
+    </div>
+    <audio id="myAudio" preload="auto" src="/music/%E5%90%B4%E9%9D%92%E5%B3%B0+-+%E7%AD%89.mp3"></audio>
     <script>
-    // Vue hydration 之后替换音乐为「等」
     (function(){
-      var done=false;
-      function swap(){
-        if(done)return;
-        var a=document.getElementById('bgm');
-        if(!a||!a.src||a.src.indexOf('1488254762')!==-1){setTimeout(swap,200);return;}
-        // 暂停旧曲，换源
-        a.pause();
-        a.src='https://music.163.com/song/media/outer/url?id=1488254762.mp3';
-        a.load();
-        // 改歌名和歌手
-        var els=document.querySelectorAll('.reco-bgm-info .info-box');
-        if(els.length>=2){els[0].childNodes[1]&&(els[0].childNodes[1].textContent='等');els[1].childNodes[1]&&(els[1].childNodes[1].textContent='吴青峰');}
-        done=true;
-      }
-      document.addEventListener('DOMContentLoaded',function(){setTimeout(swap,800);});
-      // 也监听 audio src 属性变化（防 Vue 多次覆盖）
+      var a=document.getElementById('myAudio');
+      var btn=document.getElementById('myBtn');
+      var bar=document.getElementById('myBar');
+      var pg=document.getElementById('myPg');
+      var cur=document.getElementById('myCurr');
+      var tot=document.getElementById('myTotal');
+      var playing=false;
+
+      function fm(t){var m=Math.floor(t/60);var s=Math.floor(t%60);return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+
+      a.addEventListener('loadedmetadata',function(){tot.textContent=fm(a.duration);});
+      a.addEventListener('timeupdate',function(){if(a.duration){bar.style.width=(a.currentTime/a.duration*100)+'%';cur.textContent=fm(a.currentTime);}});
+      a.addEventListener('ended',function(){playing=false;btn.innerHTML='&#9654;';btn.classList.remove('playing');bar.style.width='0';cur.textContent='00:00';});
+      a.addEventListener('error',function(){btn.innerHTML='&#9888;';btn.title='加载失败';});
+
+      pg.addEventListener('click',function(e){if(!a.duration)return;var r=pg.getBoundingClientRect();a.currentTime=((e.clientX-r.left)/r.width)*a.duration;});
+
+      btn.addEventListener('click',function(){
+        if(playing){a.pause();btn.innerHTML='&#9654;';btn.classList.remove('playing');playing=false;}
+        else{a.play();btn.innerHTML='&#9646;&#9646;';btn.classList.add('playing');playing=true;}
+      });
+
+      // 隐藏旧的 reco-bgm 播放器
       setTimeout(function(){
-        var a=document.getElementById('bgm');
-        if(a){
-          new MutationObserver(function(){swap();}).observe(a,{attributes:true,attributeFilter:['src']});
-        }
-      },500);
-      setTimeout(swap,2000);
+        var old=document.querySelector('.reco-bgm-box');
+        if(old)old.style.display='none';
+      },1500);
     })();
     </script>
 
